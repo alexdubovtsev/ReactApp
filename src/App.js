@@ -1,23 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react"; // Импортируем в каждый файл, где создаем компонент
+
+// React использует компонентный подход, вкладываем элементы 1 в другой и создаем сложные интерфейсы
+// App - корневой компонент, который монтируется в index.html
+// React позволяет больше концентрироваться на логике приложения, на работе с данными (изменяем данные, интерфейс сам подстраивается). Под капотом строится дерево react элементов (более легковесная копия ДОМ-дерева), при изменении элементов строится новое дерево и сравнивается с предыдущим - стадия согласования (отвечает ядро реакта React Core вне зависимости от среды выполнения), затем происходит отрисовка обновленных данных на странице с учетом приоритета (React DOM, React Native)
+
+// npx create-react-app my-app ..OR.. npx create-react-app . - создание проекта из текущей директории
+// Собирает конфигурацию, подключает модули, настраивает webPack
+// npm start - для запуска
 
 function App() {
+  // При изменении React не понимает что в конкретном компоненте произошли эти изменения, для этого придуманы состояния, которые позволяют перерисовать компонент
+  const state = useState(5); // Параметр - значение по умолчанию
+  console.log(state); // массив 2 элементов: значени и функция, которая изменяет состояния (т.е. мы явно указываем, что в компоненте произошли изменения)
+
+  // Деструктуризация
+  const [likes, setLikes] = useState(5);
+
+  function Increment() {
+    setLikes(likes + 1);
+  }
+
+  function Decrement() {
+    setLikes(likes - 1);
+  }
+  // Реакт понимает, что состояния изменились, и перерисовыает компонент
+
+  const [value, setValue] = useState("INPUT TEXT");
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>{likes}</h1>
+      <h1>{value}</h1>
+      <input 
+      type="text" 
+      value={value} 
+      onChange={event => setValue(event.target.value)} // Колбеки для событий принимают event, теперь добились синхронизации состояния и значения в инпуте
+      />
+
+      {/* Не вызваем функции, а передаем как ссылку */}
+      <button onClick={Increment}>Incr</button>
+      <button onClick={Decrement}>Decr</button>
     </div>
   );
 }
