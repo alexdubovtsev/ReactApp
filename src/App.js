@@ -1,4 +1,8 @@
 import React, { useState } from "react"; // Импортируем в каждый файл, где создаем компонент
+import ClassCounter from "./Components/ClassCounter";
+import Counter from "./Components/Counter";
+import Input from "./Components/Input";
+
 
 // React использует компонентный подход, вкладываем элементы 1 в другой и создаем сложные интерфейсы
 // App - корневой компонент, который монтируется в index.html
@@ -8,38 +12,16 @@ import React, { useState } from "react"; // Импортируем в кажды
 // Собирает конфигурацию, подключает модули, настраивает webPack
 // npm start - для запуска
 
+
+
+
 function App() {
-  // При изменении React не понимает что в конкретном компоненте произошли эти изменения, для этого придуманы состояния, которые позволяют перерисовать компонент
-  const state = useState(5); // Параметр - значение по умолчанию
-  console.log(state); // массив 2 элементов: значени и функция, которая изменяет состояния (т.е. мы явно указываем, что в компоненте произошли изменения)
-
-  // Деструктуризация
-  const [likes, setLikes] = useState(5);
-
-  function Increment() {
-    setLikes(likes + 1);
-  }
-
-  function Decrement() {
-    setLikes(likes - 1);
-  }
-  // Реакт понимает, что состояния изменились, и перерисовыает компонент
-
-  const [value, setValue] = useState("INPUT TEXT");
-
+  
   return (
     <div className="App">
-      <h1>{likes}</h1>
-      <h1>{value}</h1>
-      <input 
-      type="text" 
-      value={value} 
-      onChange={event => setValue(event.target.value)} // Колбеки для событий принимают event, теперь добились синхронизации состояния и значения в инпуте
-      />
-
-      {/* Не вызваем функции, а передаем как ссылку */}
-      <button onClick={Increment}>Incr</button>
-      <button onClick={Decrement}>Decr</button>
+      <Counter/>  {/* Компонент - функция, которая возвращает jsx */}
+      <ClassCounter/>
+      <Input/>
     </div>
   );
 }
