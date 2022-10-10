@@ -1,0 +1,43 @@
+@import "nullstyle";
+
+body {
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 18px;
+  color: #fff;
+  background: #333;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+button {
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+button:not(:last-child) {
+  margin-right: 10px;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+}
+
+.App {
+  width: 800px;
+}
+
+
+.post {
+  display: flex;
+  padding: 15px;
+  border: 2px solid rgb(52, 177, 226);
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+
