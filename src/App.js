@@ -4,6 +4,8 @@ import Counter from "./Components/Counter";
 import Input from "./Components/Input";
 import PostItem from "./Components/PostItem";
 import PostList from "./Components/PostList";
+import MyButton from "./Components/UI/button/MyButton";
+import MyInput from "./Components/UI//input/MyInput";
 
 import "./Styles/App.css";
 
@@ -18,7 +20,6 @@ import "./Styles/App.css";
 // React хуки - некоторые функции, которые предоставляет реакт (можно юзать в функциональных компонентах или при создании своих хуков). Можно использовать только на верхнем уровне вложенности (НЕ в функциях, циклах, условиях)
 // useState - управление состоянием
 
-
 function App() {
   // Состояние с массивом постов
   const [posts, setPosts] = useState([
@@ -27,6 +28,13 @@ function App() {
     { id: 3, title: "JavaScript 3", body: "Description" },
   ]);
 
+  const [title, setTitle] = useState("");
+
+  const addNewPost = (e) => {
+    e.preventDefault(); // отменяем обновление после нажатия кнопки
+    console.log(title);
+  }
+
   return (
     <div className="App">
       <div className="container">
@@ -34,8 +42,13 @@ function App() {
         <ClassCounter />
         <Input />
         <br />
-        
-        <PostList posts={posts} title={"Список постов про JS"}/>
+        <form>
+          {/* Управляемый компонент */}
+          <MyInput onChange={(event) => setTitle(event.target.value)} value={title} type="text" placeholder="Название поста" />
+          <MyInput type="text" placeholder="Описание поста" />
+          <MyButton onClick={addNewPost}>Создать пост</MyButton>
+        </form>
+        <PostList posts={posts} title={"Список постов про JS"} />
       </div>
     </div>
   );
