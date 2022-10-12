@@ -10,10 +10,10 @@ const PostList = ({posts, title}) => {
       {/* <PostItem post={{ id: 1, title: "JavaScript", body: "Description" }} /> */}
       
       {/* Обращаемся к списку постов, вызывая map, и передаем колбек, где каждый объект массива преобразовываем в РЕАКТ-элемент*/}
-      {posts.map((post) => (
+      {posts.map((post, index) => (
         // для каждого поста отрисовываем item, и как props передаем объект
         // При создании списков нужно указывать ключ с уникальным значением (id используемого (измененного) объекта)
-        <PostItem post={post} key={post.id} />
+        <PostItem number={index + 1} post={post} key={post.id} />
       ))}
     </div>
   );

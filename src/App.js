@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // Импортируем в каждый файл, где создаем компонент
+import React, { useRef, useState } from "react"; // Импортируем в каждый файл, где создаем компонент
 import ClassCounter from "./Components/ClassCounter";
 import Counter from "./Components/Counter";
 import Input from "./Components/Input";
@@ -19,6 +19,7 @@ import "./Styles/App.css";
 
 // React хуки - некоторые функции, которые предоставляет реакт (можно юзать в функциональных компонентах или при создании своих хуков). Можно использовать только на верхнем уровне вложенности (НЕ в функциях, циклах, условиях)
 // useState - управление состоянием
+// useRef - доступ к ДОМ-элементу. Можно получить данные (value) с неуправляемого компонента
 
 function App() {
   // Состояние с массивом постов
@@ -28,12 +29,20 @@ function App() {
     { id: 3, title: "JavaScript 3", body: "Description" },
   ]);
 
-  const [title, setTitle] = useState("");
+  const [post, setPost] = useState({
+    title: "",
+    body: "",
+  });
+
+  const bodyInputRef = useRef(); // есть единственное поле current - ДОМ-элемент
+  // console.log(bodyInputRef.current.value);
 
   const addNewPost = (e) => {
     e.preventDefault(); // отменяем обновление после нажатия кнопки
-    console.log(title);
-  }
+    setPosts([...posts, {...post, id: Date.now()}]); // Не изменяем состояние напрямую, а вызываем функцию setPosts и передаем старый массив + новый пост
+    // Обнуляем состояния
+    setPost({title: "",body: "",})
+  };
 
   return (
     <div className="App">
@@ -44,8 +53,21 @@ function App() {
         <br />
         <form>
           {/* Управляемый компонент */}
-          <MyInput onChange={(event) => setTitle(event.target.value)} value={title} type="text" placeholder="Название поста" />
-          <MyInput type="text" placeholder="Описание поста" />
+          <MyInput
+            // Разворачиваем старый пост со всеми полями, но перезаписываем title
+            onChange={(e) => setPost({...post, title: e.target.value})}
+            value={post.title}
+            type="text"
+            placeholder="Название поста"
+          />
+          <MyInput
+            onChange={(e) => setPost({...post, body: e.target.value})}
+            value={post.body}
+            type="text"
+            placeholder="Описание поста"
+          />
+          {/* Неуправляемый компонент */}
+          {/* <MyInput ref={bodyInputRef} type="text" placeholder="Описание поста" /> */}
           <MyButton onClick={addNewPost}>Создать пост</MyButton>
         </form>
         <PostList posts={posts} title={"Список постов про JS"} />
