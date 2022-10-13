@@ -16,7 +16,7 @@ export const useSortedPosts = (posts, sort) => {
 export const usePosts = (posts, sort, query) => {
   const sortedPosts = useSortedPosts(posts, sort);
 
-  // Теперь в sortedPosts лежит отсортированный массив, при это ммассив posts не изменяется
+  // Теперь в sortedPosts лежит отсортированный массив, при это массив posts не изменяется
   const sortedAndSearchedPosts = useMemo(() => {
     return sortedPosts.filter((post) =>
       post.title.toLowerCase().includes(query.toLowerCase())
