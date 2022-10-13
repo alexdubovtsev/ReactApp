@@ -9,9 +9,10 @@ import MySelect from "./Components/UI/select/MySelect";
 import MyInput from "./Components/UI//input/MyInput";
 import PostFilter from "./Components/PostFilter";
 import MyModal from "./Components/UI/MyModal/MyModal";
-
-import "./Styles/App.css";
 import MyButton from "./Components/UI/button/MyButton";
+
+import { usePosts } from "./Hooks/usePosts.js";
+import "./Styles/App.css";
 
 // npm install react-transition-group --save - библиотека для анимаций (https://reactcommunity.org/react-transition-group/transition-group)
 
@@ -43,23 +44,7 @@ function App() {
     query: "",
   });
 
-  const sortedPosts = useMemo(() => {
-    console.log("getSortedPosts is working");
-    if (filter.sort) {
-      // Состояния напрямую изменять нельзя, поэтому развернем посты в новый массив и отсортируем его
-      return [...posts].sort((a, b) =>
-        a[filter.sort].localeCompare(b[filter.sort])
-      );
-    }
-    return posts;
-  }, [filter.sort, posts]); // Следим за выбранным алгоритмом сортировки и массивом постов (если добавлен новый элемент, массив также нужно отсортировать)
-
-  // Теперь в sortedPosts лежит отсортированный массив, при это ммассив posts не изменяется
-  const sortedAndSearchedPosts = useMemo(() => {
-    return sortedPosts.filter((post) =>
-      post.title.toLowerCase().includes(filter.query.toLowerCase())
-    );
-  }, [filter.query, sortedPosts]);
+  const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
   // Делаем обратный вызов (колбэк), тк внутри дочернего компонента мы не имеем доступ к состоянию родительского
   // На вход получаем новый пост, передаваемый в компоненте PostForm
