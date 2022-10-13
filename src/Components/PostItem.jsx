@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import MyButton from "./UI/button/MyButton";
+
 const PostItem = (props) => {
   // Компонент может принимать входные данные - props
 
@@ -12,7 +14,9 @@ const PostItem = (props) => {
         <div>{props.post.body}</div>
       </div>
       <div className="btns">
-        <button className="btn">Delete post</button>
+        <MyButton onClick={() => props.remove(props.post)} className="btn">
+          Delete post
+        </MyButton>
       </div>
     </div>
   );

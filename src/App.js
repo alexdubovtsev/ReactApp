@@ -2,10 +2,10 @@ import React, { useRef, useState } from "react"; // Импортируем в к
 import ClassCounter from "./Components/ClassCounter";
 import Counter from "./Components/Counter";
 import Input from "./Components/Input";
-import PostItem from "./Components/PostItem";
 import PostList from "./Components/PostList";
-import MyButton from "./Components/UI/button/MyButton";
-import MyInput from "./Components/UI//input/MyInput";
+import PostItem from "./Components/PostItem";
+import PostForm from "./Components/PostForm";
+import MySelect from "./Components/UI/select/MySelect";
 
 import "./Styles/App.css";
 
@@ -24,25 +24,31 @@ import "./Styles/App.css";
 function App() {
   // Состояние с массивом постов
   const [posts, setPosts] = useState([
-    { id: 1, title: "JavaScript 1", body: "Description" },
-    { id: 2, title: "JavaScript 2", body: "Description" },
-    { id: 3, title: "JavaScript 3", body: "Description" },
+    { id: 1, title: "hJavaScript 1", body: "Description a" },
+    { id: 2, title: "vJavaScript 2", body: "Description c" },
+    { id: 3, title: "gJavaScript 3", body: "Description b" },
   ]);
 
-  const [post, setPost] = useState({
-    title: "",
-    body: "",
-  });
+  // Делаем обратный вызов (колбэк), тк внутри дочернего компонента мы не имеем доступ к состоянию родительского
+  // На вход получаем новый пост, передаваемый в компоненте PostForm
+  const createPost = (newPost) => {
+    setPosts([...posts, newPost]);
+  };
+
+  const removePost = (post) => {
+    setPosts(posts.filter((p) => p.id !== post.id));
+  };
+
+  const [selectedSort, setSelectedSort] = useState("");
+
+  const sortPosts = (sort) => {
+    setSelectedSort(sort);
+    // Состояния напрямую изменять нельзя, поэтому развернем посты в новый массив и отсортируем его
+    setPosts([...posts].sort((a, b) => a[sort].localeCompare(b[sort])))
+  }
 
   const bodyInputRef = useRef(); // есть единственное поле current - ДОМ-элемент
   // console.log(bodyInputRef.current.value);
-
-  const addNewPost = (e) => {
-    e.preventDefault(); // отменяем обновление после нажатия кнопки
-    setPosts([...posts, {...post, id: Date.now()}]); // Не изменяем состояние напрямую, а вызываем функцию setPosts и передаем старый массив + новый пост
-    // Обнуляем состояния
-    setPost({title: "",body: "",})
-  };
 
   return (
     <div className="App">
@@ -51,26 +57,29 @@ function App() {
         <ClassCounter />
         <Input />
         <br />
-        <form>
-          {/* Управляемый компонент */}
-          <MyInput
-            // Разворачиваем старый пост со всеми полями, но перезаписываем title
-            onChange={(e) => setPost({...post, title: e.target.value})}
-            value={post.title}
-            type="text"
-            placeholder="Название поста"
+        <br />
+        <PostForm create={createPost} />
+        <hr style={{ margin: "15px 0" }} />
+        <MySelect
+          value={selectedSort}
+          // в качестве OnChange будем вызывать sortPorts и передавать то, что приходит из селекта (выбранная пользователем сортировка )
+          onChange={sortPosts}
+          defaultValue="Sort by"
+          options={[
+            { value: "title", name: "title" },
+            { value: "body", name: "body" },
+          ]}
+        ></MySelect>
+        {/* Условная отрисовка */}
+        {posts.length ? (
+          <PostList
+            remove={removePost}
+            posts={posts}
+            title={"Список постов про JS"}
           />
-          <MyInput
-            onChange={(e) => setPost({...post, body: e.target.value})}
-            value={post.body}
-            type="text"
-            placeholder="Описание поста"
-          />
-          {/* Неуправляемый компонент */}
-          {/* <MyInput ref={bodyInputRef} type="text" placeholder="Описание поста" /> */}
-          <MyButton onClick={addNewPost}>Создать пост</MyButton>
-        </form>
-        <PostList posts={posts} title={"Список постов про JS"} />
+        ) : (
+          <h1 style={{ textAlign: "center" }}>Посты не найдены</h1>
+        )}
       </div>
     </div>
   );
