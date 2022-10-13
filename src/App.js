@@ -13,6 +13,7 @@ import MyModal from "./Components/UI/MyModal/MyModal";
 import "./Styles/App.css";
 import MyButton from "./Components/UI/button/MyButton";
 
+// npm install react-transition-group --save - библиотека для анимаций (https://reactcommunity.org/react-transition-group/transition-group)
 
 // React использует компонентный подход, вкладываем элементы 1 в другой и создаем сложные интерфейсы
 // App - корневой компонент, который монтируется в index.html
