@@ -8,8 +8,11 @@ import PostForm from "./Components/PostForm";
 import MySelect from "./Components/UI/select/MySelect";
 import MyInput from "./Components/UI//input/MyInput";
 import PostFilter from "./Components/PostFilter";
+import MyModal from "./Components/UI/MyModal/MyModal";
 
 import "./Styles/App.css";
+import MyButton from "./Components/UI/button/MyButton";
+
 
 // React использует компонентный подход, вкладываем элементы 1 в другой и создаем сложные интерфейсы
 // App - корневой компонент, который монтируется в index.html
@@ -31,6 +34,8 @@ function App() {
     { id: 2, title: "vJavaScript 2", body: "Description c" },
     { id: 3, title: "gJavaScript 3", body: "Description b" },
   ]);
+
+  const [modal, setModal] = useState(false);
 
   const [filter, setFilter] = useState({
     sort: "",
@@ -59,6 +64,7 @@ function App() {
   // На вход получаем новый пост, передаваемый в компоненте PostForm
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
+    setModal(false);
   };
 
   const removePost = (post) => {
@@ -70,14 +76,17 @@ function App() {
 
   return (
     <div className="App">
+      <MyModal visible={modal} setVisible={setModal}>
+        <PostForm create={createPost} />
+      </MyModal>
       <div className="container">
         <Counter /> {/* Компонент - функция, которая возвращает jsx */}
         <ClassCounter />
         <Input />
         <br />
         <br />
-        <PostForm create={createPost} />
         <hr style={{ margin: "15px 0" }} />
+        <MyButton onClick={() => setModal(true)}>Add post</MyButton>
         <PostFilter filter={filter} setFilter={setFilter} />
         <PostList
           remove={removePost}
