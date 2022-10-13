@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react"; // Импортируем в каждый файл, где создаем компонент
+import React, { useRef, useState, useMemo } from "react"; // Импортируем в каждый файл, где создаем компонент
 import ClassCounter from "./Components/ClassCounter";
 import Counter from "./Components/Counter";
 import Input from "./Components/Input";
@@ -6,6 +6,8 @@ import PostList from "./Components/PostList";
 import PostItem from "./Components/PostItem";
 import PostForm from "./Components/PostForm";
 import MySelect from "./Components/UI/select/MySelect";
+import MyInput from "./Components/UI//input/MyInput";
+import PostFilter from "./Components/PostFilter";
 
 import "./Styles/App.css";
 
@@ -20,6 +22,7 @@ import "./Styles/App.css";
 // React хуки - некоторые функции, которые предоставляет реакт (можно юзать в функциональных компонентах или при создании своих хуков). Можно использовать только на верхнем уровне вложенности (НЕ в функциях, циклах, условиях)
 // useState - управление состоянием
 // useRef - доступ к ДОМ-элементу. Можно получить данные (value) с неуправляемого компонента
+// useMemo(callback, deps) - принимает колбэк и массив зависимостей. Колбэк должен возвращать результат вычислений(отсортированный или отфильтрованный массив). В массив зависимостей можнло передавать переменные, поля объекта. Данная функция производит вычисленияЮ запоминает результат и кэширует (такое поведение называется мемоизация). Если зависимость изменилась (например, выбрали другой алгоритм сортировки), функция пересчитывает и кэширует результат до тех пор, пока 1 из зависимостей не изменится. Если зависимсотей нет, функция отработает 1 раз и запомнит результат.
 
 function App() {
   // Состояние с массивом постов
@@ -28,6 +31,29 @@ function App() {
     { id: 2, title: "vJavaScript 2", body: "Description c" },
     { id: 3, title: "gJavaScript 3", body: "Description b" },
   ]);
+
+  const [filter, setFilter] = useState({
+    sort: "",
+    query: "",
+  });
+
+  const sortedPosts = useMemo(() => {
+    console.log("getSortedPosts is working");
+    if (filter.sort) {
+      // Состояния напрямую изменять нельзя, поэтому развернем посты в новый массив и отсортируем его
+      return [...posts].sort((a, b) =>
+        a[filter.sort].localeCompare(b[filter.sort])
+      );
+    }
+    return posts;
+  }, [filter.sort, posts]); // Следим за выбранным алгоритмом сортировки и массивом постов (если добавлен новый элемент, массив также нужно отсортировать)
+
+  // Теперь в sortedPosts лежит отсортированный массив, при это ммассив posts не изменяется
+  const sortedAndSearchedPosts = useMemo(() => {
+    return sortedPosts.filter((post) =>
+      post.title.toLowerCase().includes(filter.query.toLowerCase())
+    );
+  }, [filter.query, sortedPosts]);
 
   // Делаем обратный вызов (колбэк), тк внутри дочернего компонента мы не имеем доступ к состоянию родительского
   // На вход получаем новый пост, передаваемый в компоненте PostForm
@@ -38,14 +64,6 @@ function App() {
   const removePost = (post) => {
     setPosts(posts.filter((p) => p.id !== post.id));
   };
-
-  const [selectedSort, setSelectedSort] = useState("");
-
-  const sortPosts = (sort) => {
-    setSelectedSort(sort);
-    // Состояния напрямую изменять нельзя, поэтому развернем посты в новый массив и отсортируем его
-    setPosts([...posts].sort((a, b) => a[sort].localeCompare(b[sort])))
-  }
 
   const bodyInputRef = useRef(); // есть единственное поле current - ДОМ-элемент
   // console.log(bodyInputRef.current.value);
@@ -60,26 +78,12 @@ function App() {
         <br />
         <PostForm create={createPost} />
         <hr style={{ margin: "15px 0" }} />
-        <MySelect
-          value={selectedSort}
-          // в качестве OnChange будем вызывать sortPorts и передавать то, что приходит из селекта (выбранная пользователем сортировка )
-          onChange={sortPosts}
-          defaultValue="Sort by"
-          options={[
-            { value: "title", name: "title" },
-            { value: "body", name: "body" },
-          ]}
-        ></MySelect>
-        {/* Условная отрисовка */}
-        {posts.length ? (
-          <PostList
-            remove={removePost}
-            posts={posts}
-            title={"Список постов про JS"}
-          />
-        ) : (
-          <h1 style={{ textAlign: "center" }}>Посты не найдены</h1>
-        )}
+        <PostFilter filter={filter} setFilter={setFilter} />
+        <PostList
+          remove={removePost}
+          posts={sortedAndSearchedPosts}
+          title={"Список постов про JS"}
+        />
       </div>
     </div>
   );
