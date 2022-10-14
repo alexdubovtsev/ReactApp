@@ -16,6 +16,7 @@ import "./Styles/App.css";
 import axios from "axios";
 import PostService from "./API/PostService";
 import Loader from "./Components/UI/Loader/Loader";
+import { useFetching } from "./Hooks/useFetching";
 
 // npm install react-transition-group --save - библиотека для анимаций (https://reactcommunity.org/react-transition-group/transition-group)
 
@@ -56,7 +57,12 @@ function App() {
 
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
-  const [isPostsLoading, setIsPostsLoading] = useState(false);
+  // Функция, которая отправляет запрос на сервер, получать данные и помещать их в состояния с постами
+  const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
+    // сюда помещаем результат выполнения запроса
+    const posts = await PostService.getAll();
+    setPosts(posts);
+  });
 
   // Делаем обратный вызов (колбэк), тк внутри дочернего компонента мы не имеем доступ к состоянию родительского
   // На вход получаем новый пост, передаваемый в компоненте PostForm
@@ -68,17 +74,6 @@ function App() {
   useEffect(() => {
     fetchPosts();
   }, []);
-
-  // Функция, которая отправляет запрос на сервер, получать данные и помещать их в состояния с постами
-  async function fetchPosts() {
-    setIsPostsLoading(true);
-    setTimeout(async () => {
-      // сюда помещаем результат выполнения запроса
-      const posts = await PostService.getAll();
-      setPosts(posts);
-      setIsPostsLoading(false);
-    }, 2000);
-  }
 
   const removePost = (post) => {
     setPosts(posts.filter((p) => p.id !== post.id));
@@ -102,8 +97,15 @@ function App() {
         <hr style={{ margin: "15px 0" }} />
         <MyButton onClick={() => setModal(true)}>Add post</MyButton>
         <PostFilter filter={filter} setFilter={setFilter} />
+        {postError && <h1>Error ${postError}</h1>}
         {isPostsLoading ? (
-          <div style={{display: 'flex', justifyContent: 'center', marginTop: '50px'}}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "50px",
+            }}
+          >
             <Loader />
           </div>
         ) : (
