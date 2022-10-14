@@ -14,6 +14,8 @@ import MyButton from "./Components/UI/button/MyButton";
 import { usePosts } from "./Hooks/usePosts.js";
 import "./Styles/App.css";
 import axios from "axios";
+import PostService from "./API/PostService";
+import Loader from "./Components/UI/Loader/Loader";
 
 // npm install react-transition-group --save - библиотека для анимаций (https://reactcommunity.org/react-transition-group/transition-group)
 
@@ -54,6 +56,8 @@ function App() {
 
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
+  const [isPostsLoading, setIsPostsLoading] = useState(false);
+
   // Делаем обратный вызов (колбэк), тк внутри дочернего компонента мы не имеем доступ к состоянию родительского
   // На вход получаем новый пост, передаваемый в компоненте PostForm
   const createPost = (newPost) => {
@@ -67,11 +71,13 @@ function App() {
 
   // Функция, которая отправляет запрос на сервер, получать данные и помещать их в состояния с постами
   async function fetchPosts() {
-    // сюда помещаем результат выполнения запроса
-    const response = await axios.get(
-      "https://jsonplaceholder.typicode.com/posts"
-    );
-    setPosts(response.data);
+    setIsPostsLoading(true);
+    setTimeout(async () => {
+      // сюда помещаем результат выполнения запроса
+      const posts = await PostService.getAll();
+      setPosts(posts);
+      setIsPostsLoading(false);
+    }, 2000);
   }
 
   const removePost = (post) => {
@@ -96,11 +102,17 @@ function App() {
         <hr style={{ margin: "15px 0" }} />
         <MyButton onClick={() => setModal(true)}>Add post</MyButton>
         <PostFilter filter={filter} setFilter={setFilter} />
-        <PostList
-          remove={removePost}
-          posts={sortedAndSearchedPosts}
-          title={"Список постов про JS"}
-        />
+        {isPostsLoading ? (
+          <div style={{display: 'flex', justifyContent: 'center', marginTop: '50px'}}>
+            <Loader />
+          </div>
+        ) : (
+          <PostList
+            remove={removePost}
+            posts={sortedAndSearchedPosts}
+            title={"Список постов про JS"}
+          />
+        )}
       </div>
     </div>
   );
