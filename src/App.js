@@ -17,6 +17,9 @@ import axios from "axios";
 import PostService from "./API/PostService";
 import Loader from "./Components/UI/Loader/Loader";
 import { useFetching } from "./Hooks/useFetching";
+import { getPageCount, getPagesArray } from "./Utils/pages";
+
+// ! Сделать массив страниц с использоваем useMemo (пересчитывать массив при изменении общего количества страниц) Сделать хук usePagination, который заполняет массив
 
 // npm install react-transition-group --save - библиотека для анимаций (https://reactcommunity.org/react-transition-group/transition-group)
 
@@ -57,11 +60,19 @@ function App() {
 
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
+  const [totalPages, setTotalPages] = useState(0);
+  const [limit, setLimit] = useState(10);
+  const [page, setPage] = useState(1);
+
+  let pagesArray = getPagesArray(totalPages);
+
   // Функция, которая отправляет запрос на сервер, получать данные и помещать их в состояния с постами
   const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
     // сюда помещаем результат выполнения запроса
-    const posts = await PostService.getAll();
-    setPosts(posts);
+    const response = await PostService.getAll(limit, page);
+    setPosts(response.data);
+    const totalCount = response.headers["x-total-count"];
+    setTotalPages(getPageCount(totalCount, limit));
   });
 
   // Делаем обратный вызов (колбэк), тк внутри дочернего компонента мы не имеем доступ к состоянию родительского
@@ -78,6 +89,12 @@ function App() {
   const removePost = (post) => {
     setPosts(posts.filter((p) => p.id !== post.id));
   };
+
+  // Функция изменяет номер страницы, и с измененным номером страницы подгудать новую порцию данных
+  const changePage = (page) => {
+    setPage(page);
+    fetchPosts();
+  }
 
   const bodyInputRef = useRef(); // есть единственное поле current - ДОМ-элемент
   // console.log(bodyInputRef.current.value);
@@ -115,6 +132,18 @@ function App() {
             title={"Список постов про JS"}
           />
         )}
+        <div className="page__wrapper">
+          {pagesArray.map((p) => (
+            // Если элемент итерации функции map равен номеру текущей страницы, добавим доп.класс
+            <span
+              onClick={() => changePage(p)}
+              key={p}
+              className={page === p ? "page page__current" : "page"}
+            >
+              {p}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
