@@ -18,6 +18,7 @@ import PostService from "./API/PostService";
 import Loader from "./Components/UI/Loader/Loader";
 import { useFetching } from "./Hooks/useFetching";
 import { getPageCount, getPagesArray } from "./Utils/pages";
+import MyPagination from "./Components/UI/pagination/MyPagination";
 
 // ! Сделать массив страниц с использоваем useMemo (пересчитывать массив при изменении общего количества страниц) Сделать хук usePagination, который заполняет массив
 
@@ -64,16 +65,18 @@ function App() {
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(1);
 
-  let pagesArray = getPagesArray(totalPages);
+  // Изменение состояний - асинхронный процесс (для чего это? - например, вызывается несколько функций, изменяются состояния, это вызывает изменение каких-то дочерних компонентов, поэтмоу в целях оптимизации РЕАКТ применяет эти изменения разом, чтобы избежать повторных манипуляций с ДОМ)
 
   // Функция, которая отправляет запрос на сервер, получать данные и помещать их в состояния с постами
-  const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
-    // сюда помещаем результат выполнения запроса
-    const response = await PostService.getAll(limit, page);
-    setPosts(response.data);
-    const totalCount = response.headers["x-total-count"];
-    setTotalPages(getPageCount(totalCount, limit));
-  });
+  const [fetchPosts, isPostsLoading, postError] = useFetching(
+    async (limit, page) => {
+      // сюда помещаем результат выполнения запроса
+      const response = await PostService.getAll(limit, page);
+      setPosts(response.data);
+      const totalCount = response.headers["x-total-count"];
+      setTotalPages(getPageCount(totalCount, limit));
+    }
+  );
 
   // Делаем обратный вызов (колбэк), тк внутри дочернего компонента мы не имеем доступ к состоянию родительского
   // На вход получаем новый пост, передаваемый в компоненте PostForm
@@ -83,18 +86,18 @@ function App() {
   };
 
   useEffect(() => {
-    fetchPosts();
+    fetchPosts(limit, page);
   }, []);
 
   const removePost = (post) => {
     setPosts(posts.filter((p) => p.id !== post.id));
   };
 
-  // Функция изменяет номер страницы, и с измененным номером страницы подгудать новую порцию данных
+  // Функция изменяет номер страницы, и с измененным номером страницы подгружать новую порцию данных
   const changePage = (page) => {
     setPage(page);
-    fetchPosts();
-  }
+    fetchPosts(limit, page);
+  };
 
   const bodyInputRef = useRef(); // есть единственное поле current - ДОМ-элемент
   // console.log(bodyInputRef.current.value);
@@ -132,18 +135,11 @@ function App() {
             title={"Список постов про JS"}
           />
         )}
-        <div className="page__wrapper">
-          {pagesArray.map((p) => (
-            // Если элемент итерации функции map равен номеру текущей страницы, добавим доп.класс
-            <span
-              onClick={() => changePage(p)}
-              key={p}
-              className={page === p ? "page page__current" : "page"}
-            >
-              {p}
-            </span>
-          ))}
-        </div>
+        <MyPagination
+          page={page}
+          totalPages={totalPages}
+          changePage={changePage}
+        />
       </div>
     </div>
   );
