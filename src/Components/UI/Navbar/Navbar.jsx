@@ -6,7 +6,7 @@ const Navbar = () => {
     <div className="navbar">
       <div className="container navbar__container">
         <div className="navbar__links">
-          <Link style={{color: 'yellow'}} to="/">About</Link>
+          <Link style={{color: 'yellow'}} to="/about">About</Link>
           <Link style={{color: 'yellow'}} to="/posts">Posts</Link>
         </div>
       </div>
