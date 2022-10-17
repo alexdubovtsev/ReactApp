@@ -1,147 +1,36 @@
-import React, { useRef, useState, useMemo, useEffect } from "react"; // Импортируем в каждый файл, где создаем компонент
-import ClassCounter from "./Components/ClassCounter";
-import Counter from "./Components/Counter";
-import Input from "./Components/Input";
-import PostList from "./Components/PostList";
-import PostItem from "./Components/PostItem";
-import PostForm from "./Components/PostForm";
-import MySelect from "./Components/UI/select/MySelect";
-import MyInput from "./Components/UI//input/MyInput";
-import PostFilter from "./Components/PostFilter";
-import MyModal from "./Components/UI/MyModal/MyModal";
-import MyButton from "./Components/UI/button/MyButton";
-
-import { usePosts } from "./Hooks/usePosts.js";
+import React from "react";
+import { BrowserRouter, Route, Routes, Link, Switch, Redirect } from "react-router-dom";
+import Navbar from "./Components/UI/Navbar/Navbar";
+import About from "./Pages/About";
+import NotFound from "./Pages/NotFound";
+import Posts from "./Pages/Posts";
 import "./Styles/App.css";
-import axios from "axios";
-import PostService from "./API/PostService";
-import Loader from "./Components/UI/Loader/Loader";
-import { useFetching } from "./Hooks/useFetching";
-import { getPageCount, getPagesArray } from "./Utils/pages";
-import MyPagination from "./Components/UI/pagination/MyPagination";
-
-// ! Сделать массив страниц с использоваем useMemo (пересчитывать массив при изменении общего количества страниц) Сделать хук usePagination, который заполняет массив
-
-// npm install react-transition-group --save - библиотека для анимаций (https://reactcommunity.org/react-transition-group/transition-group)
-
-// npm i axios - библиотека, с помощью которой можно делать запросы
-
-// React использует компонентный подход, вкладываем элементы 1 в другой и создаем сложные интерфейсы
-// App - корневой компонент, который монтируется в index.html
-// React позволяет больше концентрироваться на логике приложения, на работе с данными (изменяем данные, интерфейс сам подстраивается). Под капотом строится дерево react элементов (более легковесная копия ДОМ-дерева), при изменении элементов строится новое дерево и сравнивается с предыдущим - стадия согласования (отвечает ядро реакта React Core вне зависимости от среды выполнения), затем происходит отрисовка обновленных данных на странице с учетом приоритета (React DOM, React Native)
 
 // npx create-react-app my-app ..OR.. npx create-react-app . - создание проекта из текущей директории
 // Собирает конфигурацию, подключает модули, настраивает webPack
 // npm start - для запуска
 
-// todo React хуки - некоторые функции, которые предоставляет реакт (можно юзать в функциональных компонентах или при создании своих хуков). Можно использовать только на верхнем уровне вложенности (НЕ в функциях, циклах, условиях)
-// * useState - управление состоянием
+// npm install react-transition-group --save - библиотека для анимаций (https://reactcommunity.org/react-transition-group/transition-group)
 
-// *useRef - доступ к ДОМ-элементу. Можно получить данные (value) с неуправляемого компонента
+// npm i axios - библиотека, с помощью которой можно делать запросы
 
-// *useMemo(callback, deps) - принимает колбэк и массив зависимостей. Колбэк должен возвращать результат вычислений(отсортированный или отфильтрованный массив). В массив зависимостей можнло передавать переменные, поля объекта. Данная функция производит вычисленияЮ запоминает результат и кэширует (такое поведение называется мемоизация). Если зависимость изменилась (например, выбрали другой алгоритм сортировки), функция пересчитывает и кэширует результат до тех пор, пока 1 из зависимостей не изменится. Если зависимсотей нет, функция отработает 1 раз и запомнит результат.
+// https://v5.reactrouter.com/web/guides/quick-start - библиотека для управления роутингом в браузере. Все приложение нужно обернуть в BrowserRouter(он будет отслеживать изменение пути и перерисовывать компоненты). Чтоб объявить какой-то маршрут или страницу, нужно использовать компонент Route. ЧТобы ссылки не обновлялись, используем вместо a <Link>. Routes позволяет группировать маршруты и выбрать хотя бы 1 из тех, что есть внутри (можно добавить страницу с сообщением об ошибке).
 
-// *useEffect(callback, deps) - Каждый компонент обладает своим жизненным циклом, который проходит в 3 этапа:
-// 1) При создании компонента происходит МОНТИРОВАНИЕ его в ДОМ-дерево. Интересно в том случае, когда хотим первично подгрузить данные, повесить слушатель события, отправить запрос на сервер
-// 2) ОБНОВЛЕНИЕ - изменили состояние - перерисовка. Можем следить за изменением зависимостей и делать нужные действия.
-// 3) РАЗМОНТИРОВАНИЕ - удаление компонента за ненадобностью (отписываемся от слушателя события, очищаем глобальное хранилище)
-// За этими стадиями следит хук useEffect(callback, deps) (1 хук следит за изменениями одних данных, другой за изменениями дугих, третий може отрабатывать при первичной отрисовке).
-// Если массив зависимостей пустой, калбэк отработает единожды в момент монтирования (как здесь отрисовать список постов с сервера). Чтобы следить за изменениями, надо добавить зависимости. Если калбэк возвращает функцию (очистки, отписывания от событий и т.д.), она будет вызвана в момент демонтирования компонента
+// React использует компонентный подход, вкладываем элементы 1 в другой и создаем сложные интерфейсы
+// App - корневой компонент, который монтируется в index.html
+// React позволяет больше концентрироваться на логике приложения, на работе с данными (изменяем данные, интерфейс сам подстраивается). Под капотом строится дерево react элементов (более легковесная копия ДОМ-дерева), при изменении элементов строится новое дерево и сравнивается с предыдущим - стадия согласования (отвечает ядро реакта React Core вне зависимости от среды выполнения), затем происходит отрисовка обновленных данных на странице с учетом приоритета (React DOM, React Native)
 
 function App() {
-  // Состояние с массивом постов
-  const [posts, setPosts] = useState([]);
-
-  const [modal, setModal] = useState(false);
-
-  const [filter, setFilter] = useState({
-    sort: "",
-    query: "",
-  });
-
-  const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
-
-  const [totalPages, setTotalPages] = useState(0);
-  const [limit, setLimit] = useState(10);
-  const [page, setPage] = useState(1);
-
-  // Изменение состояний - асинхронный процесс (для чего это? - например, вызывается несколько функций, изменяются состояния, это вызывает изменение каких-то дочерних компонентов, поэтмоу в целях оптимизации РЕАКТ применяет эти изменения разом, чтобы избежать повторных манипуляций с ДОМ)
-
-  // Функция, которая отправляет запрос на сервер, получать данные и помещать их в состояния с постами
-  const [fetchPosts, isPostsLoading, postError] = useFetching(
-    async (limit, page) => {
-      // сюда помещаем результат выполнения запроса
-      const response = await PostService.getAll(limit, page);
-      setPosts(response.data);
-      const totalCount = response.headers["x-total-count"];
-      setTotalPages(getPageCount(totalCount, limit));
-    }
-  );
-
-  // Делаем обратный вызов (колбэк), тк внутри дочернего компонента мы не имеем доступ к состоянию родительского
-  // На вход получаем новый пост, передаваемый в компоненте PostForm
-  const createPost = (newPost) => {
-    setPosts([...posts, newPost]);
-    setModal(false);
-  };
-
-  useEffect(() => {
-    fetchPosts(limit, page);
-  }, []);
-
-  const removePost = (post) => {
-    setPosts(posts.filter((p) => p.id !== post.id));
-  };
-
-  // Функция изменяет номер страницы, и с измененным номером страницы подгружать новую порцию данных
-  const changePage = (page) => {
-    setPage(page);
-    fetchPosts(limit, page);
-  };
-
-  const bodyInputRef = useRef(); // есть единственное поле current - ДОМ-элемент
-  // console.log(bodyInputRef.current.value);
-
   return (
-    <div className="App">
-      <MyModal visible={modal} setVisible={setModal}>
-        <PostForm create={createPost} />
-      </MyModal>
-      <div className="container">
-        <button onClick={fetchPosts}>GET POST</button>
-        <Counter /> {/* Компонент - функция, которая возвращает jsx */}
-        <ClassCounter />
-        <Input />
-        <br />
-        <br />
-        <hr style={{ margin: "15px 0" }} />
-        <MyButton onClick={() => setModal(true)}>Add post</MyButton>
-        <PostFilter filter={filter} setFilter={setFilter} />
-        {postError && <h1>Error ${postError}</h1>}
-        {isPostsLoading ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "50px",
-            }}
-          >
-            <Loader />
-          </div>
-        ) : (
-          <PostList
-            remove={removePost}
-            posts={sortedAndSearchedPosts}
-            title={"Список постов про JS"}
-          />
-        )}
-        <MyPagination
-          page={page}
-          totalPages={totalPages}
-          changePage={changePage}
-        />
-      </div>
-    </div>
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<About />} />
+        <Route path="/posts" element={<Posts />} />
+        {/* Если ничего не найдено, отрисуем NotFoundPage*/}
+        <Route path="*" element={<NotFound/>} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

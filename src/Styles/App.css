@@ -23,11 +23,12 @@ button:not(:last-child) {
 
 #root {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 .App {
-  width: 800px;
+  padding: 40px 0;
 }
 
 .post {
@@ -73,6 +74,17 @@ button:not(:last-child) {
   color: rgb(52, 177, 226);
 }
 
-
-
-
+.navbar {
+  width: 100%;
+  background-color: #222;
+}
+.navbar__container {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.navbar__links {
+  display: flex;
+  gap: 20px;
+}
