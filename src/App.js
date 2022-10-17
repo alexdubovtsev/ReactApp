@@ -1,9 +1,7 @@
 import React from "react";
-import { BrowserRouter, Route, Routes, Link, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
+import AppRouter from "./Components/AppRouter";
 import Navbar from "./Components/UI/Navbar/Navbar";
-import About from "./Pages/About";
-import NotFound from "./Pages/NotFound";
-import Posts from "./Pages/Posts";
 import "./Styles/App.css";
 
 // npx create-react-app my-app ..OR.. npx create-react-app . - создание проекта из текущей директории
@@ -24,12 +22,7 @@ function App() {
   return (
     <BrowserRouter>
       <Navbar />
-      <Routes>
-        <Route path="/" element={<About />} />
-        <Route path="/posts" element={<Posts />} />
-        {/* Если ничего не найдено, отрисуем NotFoundPage*/}
-        <Route path="*" element={<NotFound/>} />
-      </Routes>
+      <AppRouter/>
     </BrowserRouter>
   );
 }

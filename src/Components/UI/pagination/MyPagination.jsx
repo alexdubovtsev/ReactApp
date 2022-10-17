@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { getPagesArray } from "../../../Utils/pages";
 
 const MyPagination = ({ totalPages, page, changePage }) => {
