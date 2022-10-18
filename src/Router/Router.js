@@ -9,7 +9,7 @@ import Login from "../Pages/Login";
 // props exact для того, чтобы пути, имеющие /posts, воспринимались как разные
 // Чтобы машрут был динамичесикм, пишем двоеточие перед параметром
 export const privateRouter = [
-  { path: "/about", element: About, exact: true},
+  { path: "/", element: About, exact: true},
   { path: "/posts", element: Posts, exact: true},
   { path: "/posts/:id", element: PostIdPage, exact: true},
   // Если ничего не найдено, отрисуем NotFoundPage
