@@ -18,7 +18,7 @@ export const usePosts = (posts, sort, query) => {
 
   // Теперь в sortedPosts лежит отсортированный массив, при это массив posts не изменяется
   const sortedAndSearchedPosts = useMemo(() => {
-    return sortedPosts.filter((post) =>
+    return sortedPosts.filter(post =>
       post.title.toLowerCase().includes(query.toLowerCase())
     );
   }, [query, sortedPosts]);
