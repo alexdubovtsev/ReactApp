@@ -15,6 +15,8 @@ import PostService from "../API/PostService";
 import { usePosts } from "../Hooks/usePosts.js";
 import { useFetching } from "../Hooks/useFetching";
 import { getPageCount } from "../Utils/pages";
+import { useObserver } from "../Hooks/useObserver";
+import MySelect from "../Components/UI/select/MySelect";
 
 // ! Сделать массив страниц с использоваем useMemo (пересчитывать массив при изменении общего количества страниц) Сделать хук usePagination, который заполняет массив
 
@@ -32,12 +34,11 @@ function Posts() {
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
   const [totalPages, setTotalPages] = useState(0);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(1);
 
   // ССлыка на ДОМ-элемент, который последний в списке. Когда он появится в зоне видимости окна, будем подгружать новые данные
   const lastElement = useRef();
-  const observer = useRef();
 
   // Изменение состояний - асинхронный процесс (для чего это? - например, вызывается несколько функций, изменяются состояния, это вызывает изменение каких-то дочерних компонентов, поэтмоу в целях оптимизации РЕАКТ применяет эти изменения разом, чтобы избежать повторных манипуляций с ДОМ)
 
@@ -60,30 +61,13 @@ function Posts() {
     setModal(false);
   };
 
-  // entries - массив элементов, за которыми мы наблюдаем + можно получить информацию (target - сам наблюдаемый элемент, IsIntersecting - элемент в зоне видимости или нет?)
-  useEffect(() => {
-    // var options = {
-    //   root: document.querySelector("#scrollArea"),
-    //   rootMargin: "0px",
-    //   threshold: 1.0,
-    // };
-    if (isPostsLoading) return;
-    // Если обсервер за чем-то наблюдает, отключаем наблюдение
-    if (observer.current) observer.current.disconnect();
-    var callback = function (entries, observer) {
-      /* Content excerpted, show below */
-      if (entries[0].isIntersecting && page < totalPages) {
-        console.log(page);
-        setPage(page + 1);
-      }
-    };
-    observer.current = new IntersectionObserver(callback);
-    observer.current.observe(lastElement.current);
-  }, [isPostsLoading]);
+  useObserver(lastElement, page < totalPages, isPostsLoading, () => {
+    setPage(page + 1);
+  });
 
   useEffect(() => {
     fetchPosts(limit, page);
-  }, [page]);
+  }, [page, limit]);
 
   const removePost = (post) => {
     setPosts(posts.filter((p) => p.id !== post.id));
@@ -112,6 +96,29 @@ function Posts() {
         <hr style={{ margin: "15px 0" }} />
         <MyButton onClick={() => setModal(true)}>Add post</MyButton>
         <PostFilter filter={filter} setFilter={setFilter} />
+        <MySelect
+          value={limit}
+          onChange={(value) => setLimit(value)}
+          defaultValue="Elements on page"
+          options={[
+            {
+              value: 5,
+              name: "5",
+            },
+            {
+              value: 15,
+              name: "15",
+            },
+            {
+              value: 25,
+              name: "25",
+            },
+            {
+              value: -1,
+              name: "Show all",
+            },
+          ]}
+        />
         {postError && <h1>Error ${postError}</h1>}
         <PostList
           remove={removePost}
